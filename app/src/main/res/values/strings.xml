@@ -3,6 +3,8 @@
 
     <string name="app_name">Sunshine</string>
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <!-- Menu label to fetch updated weather from the server -->
+    <string name="action_settings" translatable="false">Settings</string>
+    <string name="refresh">Refresh</string>
 
 </resources>
