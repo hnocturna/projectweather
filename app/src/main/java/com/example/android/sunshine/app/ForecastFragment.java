@@ -224,8 +224,6 @@ public class ForecastFragment extends Fragment {
                 String urlString = builder.build().toString();
                 URL url = new URL(urlString);
 
-                Log.v(LOG_TAG, "Built URI: " + urlString);
-
                 // Deprecated
                 // URL url = new URL("http://api.openweathermap.org/data/2.5/forecast/daily?q=90028&mode=json&units=metric&cnt=7" + "&APPID=" + API_KEY);
 
@@ -289,7 +287,15 @@ public class ForecastFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String[] result) {
-
+            /*
+             * Update the forecastAdapter with the new data from OpenWeatherMap
+             */
+            if (result != null) {
+                forecastAdapter.clear();
+                for (String s : result) {
+                    forecastAdapter.add(s);
+                }
+            }
         }
     }
 }
