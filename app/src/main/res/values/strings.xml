@@ -6,5 +6,6 @@
     <!-- Menu label to fetch updated weather from the server -->
     <string name="action_settings" translatable="false">Settings</string>
     <string name="refresh">Refresh</string>
+    <string name="title_activity_detail">DetailActivity</string>
 
 </resources>
