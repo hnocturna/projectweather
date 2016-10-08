@@ -133,6 +133,14 @@ public class ForecastFragment extends Fragment {
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
         /*
+         * Converts temperature units from default metric to imperial units.
+         * Preserves all the data being metric when stored into database
+         */
+        private double metricToImperial(double temperature) {
+            return (temperature * 1.8) + 32;
+        }
+
+        /*
          * Converts UNIX timestamp from JSON to human readable date format
          */
         private String getReadableDateString(long time) {
@@ -141,9 +149,23 @@ public class ForecastFragment extends Fragment {
         }
 
         /*
-         * Prepares the weather for high/low presentation
+         * Prepares the weather for high/low presentation in string format
          */
         private String formatHighLows(double high, double low) {
+            // Check what units the user has specified
+            String units = PreferenceManager.getDefaultSharedPreferences(getActivity())
+                    .getString(getString(R.string.pref_units_key),
+                    getString(R.string.pref_units_default));
+
+            // If units selected is imperial, then convert to imperial units prior to converting to
+            // string
+            if (units.equals(getString(R.string.pref_units_imperial))) {
+                high = metricToImperial(high);
+                low = metricToImperial(low);
+            } else if (!units.equals(getString(R.string.pref_units_default))) {
+                Log.d(LOG_TAG, "Unit type not found: " + units);
+            }
+
             // User probably doesn't care about fractions of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
