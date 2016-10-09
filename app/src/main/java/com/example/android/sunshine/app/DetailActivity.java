@@ -53,9 +53,9 @@ public class DetailActivity extends ActionBarActivity {
      */
     private Intent createShareIntent() {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
-                .setType("text/plain")
-                .putExtra(Intent.EXTRA_TEXT, forecastStr + FORECAST_SHARE_HASHTAG);
+        shareIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)    // Sets the intent to return to the app one the share action is complete
+                .setType("text/plain")                                      // Tells Android that you are sharing plain text
+                .putExtra(Intent.EXTRA_TEXT, forecastStr + " " + FORECAST_SHARE_HASHTAG);
         return shareIntent;
     }
 
