@@ -64,15 +64,27 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             // Temporary debug button to test FetchWeatherTask
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            String location = pref.getString(getString(R.string.pref_location_key), "");
-            if (location != "") {
-                new FetchWeatherTask().execute(location);
-            }
+            updateWeather();
 
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
+    private void updateWeather() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        // If no user location is set, then retrieve the default zip code defined as "90028"
+        String location = pref.getString(getString(R.string.pref_location_key),
+                getString(R.string.pref_location_default));
+        new FetchWeatherTask().execute(location);
     }
 
     @Override
@@ -81,23 +93,23 @@ public class ForecastFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         // Deprecated
-        String[] forecastArray = {
-                "Today - Sunny - 88/63",
-                "Tomorrow - Foggy - 70/46",
-                "Weds - Cloudy - 72/63",
-                "Thurs - Apocaplyptic - 168/-273.12",
-                "Fri - Snowing - 32/17",
-                "Sat - Sleet - 27/12",
-                "Sun - Sunny - 77/65",
-        };
-
-        List<String> weekForecast = new ArrayList<>(Arrays.asList(forecastArray));
+//        String[] forecastArray = {
+//                "Today - Sunny - 88/63",
+//                "Tomorrow - Foggy - 70/46",
+//                "Weds - Cloudy - 72/63",
+//                "Thurs - Apocaplyptic - 168/-273.12",
+//                "Fri - Snowing - 32/17",
+//                "Sat - Sleet - 27/12",
+//                "Sun - Sunny - 77/65",
+//        };
+//
+//        List<String> weekForecast = new ArrayList<>(Arrays.asList(forecastArray));
 
         forecastAdapter = new ArrayAdapter<>(
                 getActivity(),
                 R.layout.list_item_forecast,
                 R.id.list_item_forecast_textview,
-                weekForecast
+                new ArrayList<String>()
         );
 
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
@@ -123,6 +135,14 @@ public class ForecastFragment extends Fragment {
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
         /*
+         * Converts temperature units from default metric to imperial units.
+         * Preserves all the data being metric when stored into database
+         */
+        private double metricToImperial(double temperature) {
+            return (temperature * 1.8) + 32;
+        }
+
+        /*
          * Converts UNIX timestamp from JSON to human readable date format
          */
         private String getReadableDateString(long time) {
@@ -131,9 +151,23 @@ public class ForecastFragment extends Fragment {
         }
 
         /*
-         * Prepares the weather for high/low presentation
+         * Prepares the weather for high/low presentation in string format
          */
         private String formatHighLows(double high, double low) {
+            // Check what units the user has specified
+            String units = PreferenceManager.getDefaultSharedPreferences(getActivity())
+                    .getString(getString(R.string.pref_units_key),
+                    getString(R.string.pref_units_default));
+
+            // If units selected is imperial, then convert to imperial units prior to converting to
+            // string
+            if (units.equals(getString(R.string.pref_units_imperial))) {
+                high = metricToImperial(high);
+                low = metricToImperial(low);
+            } else if (!units.equals(getString(R.string.pref_units_default))) {
+                Log.d(LOG_TAG, "Unit type not found: " + units);
+            }
+
             // User probably doesn't care about fractions of a degree.
             long roundedHigh = Math.round(high);
             long roundedLow = Math.round(low);
