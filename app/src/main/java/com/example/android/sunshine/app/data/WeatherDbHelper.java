@@ -1,6 +1,7 @@
 package com.example.android.sunshine.app.data;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -27,16 +28,16 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        final String SQL_CREATE_WEATHER_TABLE = "CREATE TABLE" + WeatherEntry.TABLE_NAME + " (" +
+        // Create the weather table utilizing the constants from WeatherEntry
+        final String SQL_CREATE_WEATHER_TABLE = "CREATE TABLE " + WeatherEntry.TABLE_NAME + " (" +
                 // Auto-increment the primary key of the weather entries as it will be assumed that
                 // the user will want information on dates 'following' the initial date being
                 // queried
                 WeatherEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 // The foreign key in the location database
-                // TODO: Create location database
                 WeatherEntry.COLUMN_LOC_KEY + " INTEGER NOT NULL, " +
                 WeatherEntry.COLUMN_DATE + " INTEGER NOT NULL, " +
-                WeatherEntry.COLUMN_SHORT_DESC + " INTEGER NOT NULL, " +
+                WeatherEntry.COLUMN_SHORT_DESC + " TEXT NOT NULL, " +
                 WeatherEntry.COLUMN_WEATHER_ID + " INTEGER NOT NULL, " +
 
                 WeatherEntry.COLUMN_MIN_TEMP + " INTEGER NOT NULL, " +
@@ -53,10 +54,22 @@ public class WeatherDbHelper extends SQLiteOpenHelper {
 
                 // Ensure each entry is unique by setting the date as unique and replacing the
                 // entire entry in case there is a conflict
-                "UNIQUE ( " + WeatherEntry.COLUMN_DATE + ", " +
+                "UNIQUE (" + WeatherEntry.COLUMN_DATE + ", " +
                 WeatherEntry.COLUMN_LOC_KEY + ") ON CONFLICT REPLACE);";
 
+        // Create the location table utilizing the constants from LocationEntry
+        final String SQL_CREATE_LOCATION_TABLE = "CREATE TABLE " + LocationEntry.TABLE_NAME + " (" +
+                LocationEntry._ID + " INTEGER PRIMARY KEY, " +
+                // Since the _ID is matched as the foreign key of the Weather table, the location
+                // setting (the unique value used to query OWM) must be unique to ensure there aren't
+                // duplications in the database
+                LocationEntry.COLUMN_LOCATION_SETTING + " TEXT UNIQUE NOT NULL, " +
+                LocationEntry.COLUMN_CITY_NAME + " TEXT NOT NULL, " +
+                LocationEntry.COLUMN_COORD_LAT + " REAL NOT NULL, " +
+                LocationEntry.COLUMN_COORD_LONG + " REAL NOT NULL);";
+
         sqLiteDatabase.execSQL(SQL_CREATE_WEATHER_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_LOCATION_TABLE);
     }
 
     @Override
