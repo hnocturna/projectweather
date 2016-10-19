@@ -126,7 +126,6 @@ public class WeatherContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        // TODO: Check this answer against the answer given in the lesson
         public static Uri buildWeatherLocation(String locationSetting) {
             return CONTENT_URI.buildUpon()
                     .appendPath(locationSetting)

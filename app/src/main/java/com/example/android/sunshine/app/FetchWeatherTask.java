@@ -1,12 +1,20 @@
 package com.example.android.sunshine.app;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.text.format.Time;
 import android.util.Log;
 import android.widget.ArrayAdapter;
+
+import com.example.android.sunshine.app.data.WeatherContract;
+import com.example.android.sunshine.app.data.WeatherDbHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,18 +28,63 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 
+import com.example.android.sunshine.app.data.WeatherContract.LocationEntry;
+import com.example.android.sunshine.app.data.WeatherProvider;
+
 /**
  * Created by hnoct on 10/13/2016.
  */
 public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
-    Context mContext;
+    Context context;
     ArrayAdapter<String> forecastAdapter;
+    WeatherDbHelper dbHelper;
 
     public FetchWeatherTask(Context context, ArrayAdapter<String> forecastAdapter) {
-        mContext = context;
+        this.context = context;
         this.forecastAdapter = forecastAdapter;
+        dbHelper = new WeatherDbHelper(context);
     }
+
+    /*
+     * Adds a location value to the Location Table
+     */
+    long addLocation(String locationSetting, String cityName, double lat, double lon) {
+        long _id;
+
+        // Query the database to check if the location already exists
+        Cursor locationCursor = context.getContentResolver().query(
+                LocationEntry.CONTENT_URI,
+                new String[] {LocationEntry._ID},
+                LocationEntry.COLUMN_LOCATION_SETTING + " = ?",
+                new String[] {locationSetting},
+                null
+        );
+
+        if (locationCursor.moveToFirst()) {
+            // If cursor is able to move to first then that means the location already exists in the
+            // database. In this case, just get the _id column for the returned row.
+            _id = locationCursor.getLong(locationCursor.getColumnIndex(LocationEntry._ID));
+        } else {
+            // First create a Content Value and populate it with the data to be inserted
+            ContentValues locationValues = new ContentValues();
+            locationValues.put(LocationEntry.COLUMN_LOCATION_SETTING, locationSetting);
+            locationValues.put(LocationEntry.COLUMN_CITY_NAME, cityName);
+            locationValues.put(LocationEntry.COLUMN_COORD_LAT, lat);
+            locationValues.put(LocationEntry.COLUMN_COORD_LONG, lon);
+
+            // Retrieve the URI of the row that was added
+            Uri insertedUri = context.getContentResolver().insert(
+                    LocationEntry.CONTENT_URI,
+                    locationValues
+            );
+
+            // Parse the id from the URI returned from the insert function
+            _id = ContentUris.parseId(insertedUri);
+        }
+
+        return _id;
+    };
 
     /*
      * Converts temperature units from default metric to imperial units.
@@ -54,16 +107,16 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
      */
     private String formatHighLows(double high, double low) {
         // Check what units the user has specified
-        String units = PreferenceManager.getDefaultSharedPreferences(mContext)
-                .getString(mContext.getString(R.string.pref_units_key),
-                        mContext.getString(R.string.pref_units_default));
+        String units = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(context.getString(R.string.pref_units_key),
+                        context.getString(R.string.pref_units_default));
 
         // If units selected is imperial, then convert to imperial units prior to converting to
         // string
-        if (units.equals(mContext.getString(R.string.pref_units_imperial))) {
+        if (units.equals(context.getString(R.string.pref_units_imperial))) {
             high = metricToImperial(high);
             low = metricToImperial(low);
-        } else if (!units.equals(mContext.getString(R.string.pref_units_default))) {
+        } else if (!units.equals(context.getString(R.string.pref_units_default))) {
             Log.d(LOG_TAG, "Unit type not found: " + units);
         }
 
