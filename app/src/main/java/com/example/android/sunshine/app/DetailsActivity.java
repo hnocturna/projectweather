@@ -1,6 +1,7 @@
 package com.example.android.sunshine.app;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
@@ -14,9 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class DetailActivity extends ActionBarActivity {
+public class DetailsActivity extends ActionBarActivity {
     private static String forecastStr;
-    private static final String LOG_TAG = DetailActivity.class.getSimpleName();
+    private static final String LOG_TAG = DetailsActivity.class.getSimpleName();
     private static final String FORECAST_SHARE_HASHTAG = "#SunShineApp";
 
     @Override
@@ -93,7 +94,8 @@ public class DetailActivity extends ActionBarActivity {
             Intent intent = getActivity().getIntent();
 
             if (intent != null) {
-                forecastStr = intent.getStringExtra(Intent.EXTRA_TEXT);
+                Uri weatherUri = intent.getData();
+                forecastStr = weatherUri.toString();
             } else {
                 return rootView;
             }

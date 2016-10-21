@@ -1,19 +1,16 @@
 package com.example.android.sunshine.app;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,13 +18,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.example.android.sunshine.app.data.WeatherContract;
-import com.example.android.sunshine.app.data.WeatherDbHelper;
-
-import java.util.ArrayList;
+import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
+import com.example.android.sunshine.app.data.WeatherContract.LocationEntry;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -37,6 +32,34 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     final private String LOG_TAG = ForecastFragment.class.getSimpleName();
     private ForecastAdapter forecastAdapter;
     private static final int FORECAST_LOADER = 0;
+
+    // Project used when querying data from the database so that column indices are constant. This
+    // allows the Cursor.get functions to utilize static variables instead of getColumnIndex.
+    public static final String[] FORECAST_COLUMNS = {
+            // The ID column needs to be differentiated between the two tables since the query
+            // command will utilize an INNER JOIN command to combine both tables.
+            WeatherEntry.TABLE_NAME + "." + WeatherEntry._ID,
+            WeatherEntry.COLUMN_DATE,
+            WeatherEntry.COLUMN_SHORT_DESC,
+            WeatherEntry.COLUMN_MAX_TEMP,
+            WeatherEntry.COLUMN_MIN_TEMP,
+            LocationEntry.COLUMN_LOCATION_SETTING,
+            WeatherEntry.COLUMN_WEATHER_ID,
+            LocationEntry.COLUMN_COORD_LAT,
+            LocationEntry.COLUMN_COORD_LONG
+    };
+
+    // Column indices to be used with Cursor when retrieving data from these columns. Tied to
+    // FORECAST_COLUMNS and must be changed accordingly when projection is altered.
+    static final int COL_WEATHER_ID = 0;
+    static final int COL_WEATHER_DATE = 1;
+    static final int COL_SHORT_DESC = 2;
+    static final int COL_MAX_TEMP = 3;
+    static final int COL_MIN_TEMP = 4;
+    static final int COL_LOCATION_SETTING = 5;
+    static final int COL_WEATHER_CONDITION_ID = 6;
+    static final int COL_COORD_LAT = 7;
+    static final int COL_COORD_LONG = 8;
 
     public ForecastFragment() {
     }
@@ -89,7 +112,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         return new CursorLoader(getActivity(),
                 weatherByLocationUri,
-                null,
+                FORECAST_COLUMNS,
                 null,
                 null,
                 sortOrder
@@ -166,6 +189,29 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // Get a reference to the ListView and attach the adapter
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(forecastAdapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(i);
+                if (cursor != null) {
+                    // If the cursor does not return null, build the URI for the location and date
+                    // selected
+                    String locationSetting = Utility.getPreferredLocation(getActivity());
+
+                    Uri weatherForLocationAndDateUri = WeatherEntry.buildWeatherLocationWithDate(
+                            locationSetting,
+                            cursor.getLong(COL_WEATHER_DATE)
+                    );
+
+                    // Start the DetailsActivity by passing the URI for the row that will be used
+                    // to populate the details
+                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
+                    intent.setData(weatherForLocationAndDateUri);
+                    startActivity(intent);
+                }
+            }
+        });
 
         return rootView;
     }
