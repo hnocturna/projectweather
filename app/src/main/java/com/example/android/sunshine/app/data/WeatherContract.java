@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.format.Time;
+import android.util.Log;
 
 /**
  * Created by hnoct on 10/12/2016.
@@ -141,10 +142,11 @@ public class WeatherContract {
             long normalizedDate = normalizeDate(startDate);
             // Query parameter specifies that we want to return multiple times instead of a single
             // date
-            return CONTENT_URI.buildUpon()
+            Uri uri = CONTENT_URI.buildUpon()
                     .appendPath(locationSetting)
                     .appendQueryParameter(COLUMN_DATE, Long.toString(normalizedDate))
                     .build();
+            return uri;
         }
 
         /*
