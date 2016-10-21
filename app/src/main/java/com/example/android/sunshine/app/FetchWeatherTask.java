@@ -36,12 +36,10 @@ import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
 public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
     Context context;
-    ArrayAdapter<String> forecastAdapter;
     WeatherDbHelper dbHelper;
 
-    public FetchWeatherTask(Context context, ArrayAdapter<String> forecastAdapter) {
+    public FetchWeatherTask(Context context) {
         this.context = context;
-        this.forecastAdapter = forecastAdapter;
         dbHelper = new WeatherDbHelper(context);
     }
 
@@ -64,8 +62,9 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             // If cursor is able to move to first then that means the location already exists in the
             // database. In this case, just get the _id column for the returned row.
             _id = locationCursor.getLong(locationCursor.getColumnIndex(LocationEntry._ID));
+            Log.v(LOG_TAG, "Location " + locationSetting + " exists in table!");
         } else {
-            // First create a Content Value and populate it with the data to be inserted
+            // First create a ContentValues and populate it with the data to be inserted
             ContentValues locationValues = new ContentValues();
             locationValues.put(LocationEntry.COLUMN_LOCATION_SETTING, locationSetting);
             locationValues.put(LocationEntry.COLUMN_CITY_NAME, cityName);
@@ -80,6 +79,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
             // Parse the id from the URI returned from the insert function
             _id = ContentUris.parseId(insertedUri);
+            Log.v(LOG_TAG, "New location " + locationSetting + " added to database!");
         }
 
         return _id;
@@ -88,79 +88,87 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
     /*
      * Converts temperature units from default metric to imperial units.
      * Preserves all the data being metric when stored into database
+     *
+     * Deprecated: See ForecastAdapter & Utility
      */
-    private double metricToImperial(double temperature) {
-        return (temperature * 1.8) + 32;
-    }
+//    private double metricToImperial(double temperature) {
+//        return (temperature * 1.8) + 32;
+//    }
 
     /*
      * Converts UNIX timestamp from JSON to human readable date format
+     *
+     * Deprecated: See ForecastAdapter & Utility
      */
-    private String getReadableDateString(long time) {
-        SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
-        return shortenedDateFormat.format(time);
-    }
+//    private String getReadableDateString(long time) {
+//        SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
+//        return shortenedDateFormat.format(time);
+//    }
 
     /*
      * Prepares the weather for high/low presentation in string format
+     *
+     * Deprecated: See ForecastAdapter & Utility
      */
-    private String formatHighLows(double high, double low) {
-        // Check what units the user has specified
-        String units = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(context.getString(R.string.pref_units_key),
-                        context.getString(R.string.pref_units_default));
-
-        // If units selected is imperial, then convert to imperial units prior to converting to
-        // string
-        if (units.equals(context.getString(R.string.pref_units_imperial))) {
-            high = metricToImperial(high);
-            low = metricToImperial(low);
-        } else if (!units.equals(context.getString(R.string.pref_units_default))) {
-            Log.d(LOG_TAG, "Unit type not found: " + units);
-        }
-
-        // User probably doesn't care about fractions of a degree.
-        long roundedHigh = Math.round(high);
-        long roundedLow = Math.round(low);
-
-        String highLowStr = roundedHigh + "/" + roundedLow;
-        return highLowStr;
-    }
+//    private String formatHighLows(double high, double low) {
+//        // Check what units the user has specified
+//        String units = PreferenceManager.getDefaultSharedPreferences(context)
+//                .getString(context.getString(R.string.pref_units_key),
+//                        context.getString(R.string.pref_units_metric));
+//
+//        // If units selected is imperial, then convert to imperial units prior to converting to
+//        // string
+//        if (units.equals(context.getString(R.string.pref_units_imperial))) {
+//            high = metricToImperial(high);
+//            low = metricToImperial(low);
+//        } else if (!units.equals(context.getString(R.string.pref_units_metric))) {
+//            Log.d(LOG_TAG, "Unit type not found: " + units);
+//        }
+//
+//        // User probably doesn't care about fractions of a degree.
+//        long roundedHigh = Math.round(high);
+//        long roundedLow = Math.round(low);
+//
+//        String highLowStr = roundedHigh + "/" + roundedLow;
+//        return highLowStr;
+//    }
 
     /*
      * Extract data from ContentValues and parse it into a String format that the primitive UX will
      * recognize
+     *
+     * Deprecated: See ForecastAdapter & Utility
      */
-    private String[] convertContentValuesToUXFormat(Vector<ContentValues> contentValuesVector) {
-        String[] weatherArray = new String[contentValuesVector.size()];
-
-        for (int i = 0; i < contentValuesVector.size(); i++) {
-            // Retrieve a single ContentValues
-            ContentValues contentValues = contentValuesVector.elementAt(i);
-
-            // Retrieve the data from within the ContentValues
-            double maxTemperature = contentValues.getAsDouble(WeatherEntry.COLUMN_MAX_TEMP);
-            double minTemperature = contentValues.getAsDouble(WeatherEntry.COLUMN_MIN_TEMP);
-            long date = contentValues.getAsLong(WeatherEntry.COLUMN_DATE);
-            String description = contentValues.getAsString(WeatherEntry.COLUMN_SHORT_DESC);
-
-            // Parse the high and low temperatures into readable format
-            String highAndLow = formatHighLows(maxTemperature, minTemperature);
-
-            // Parse the date into readable format and combine to form the full String
-            weatherArray[i] = getReadableDateString(date) +
-                    " - " + description +
-                    " - " + highAndLow;
-
-        }
-        return weatherArray;
-    }
+//    private String[] convertContentValuesToUXFormat(Vector<ContentValues> contentValuesVector) {
+//        String[] weatherArray = new String[contentValuesVector.size()];
+//
+//        for (int i = 0; i < contentValuesVector.size(); i++) {
+//            // Retrieve a single ContentValues
+//            ContentValues contentValues = contentValuesVector.elementAt(i);
+//
+//            // Retrieve the data from within the ContentValues
+//            double maxTemperature = contentValues.getAsDouble(WeatherEntry.COLUMN_MAX_TEMP);
+//            double minTemperature = contentValues.getAsDouble(WeatherEntry.COLUMN_MIN_TEMP);
+//            long date = contentValues.getAsLong(WeatherEntry.COLUMN_DATE);
+//            String description = contentValues.getAsString(WeatherEntry.COLUMN_SHORT_DESC);
+//
+//            // Parse the high and low temperatures into readable format
+//            String highAndLow = formatHighLows(maxTemperature, minTemperature);
+//
+//            // Parse the date into readable format and combine to form the full String
+//            weatherArray[i] = getReadableDateString(date) +
+//                    " - " + description +
+//                    " - " + highAndLow;
+//
+//        }
+//        return weatherArray;
+//    }
 
     /*
      * Parse the JSON string returned from the FetchWeatherTask and pull the required data
      * from the JSON Object
      */
-    private String[] getWeatherDataFromString(String forecastJsonStr, int numDays) throws JSONException {
+    private String[] getWeatherDataFromString(String forecastJsonStr, String locationSetting) throws JSONException {
         // These are the names of the JSON objects that need to be extracted.
         // Array that holds all weather values
         final String OWM_LIST = "list";
@@ -201,7 +209,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             // Get location values
             JSONObject cityObject = forecastJson.getJSONObject(OWM_LOCATION);
             String cityName = cityObject.getString(OWM_CITY_NAME);
-            String locationSetting = cityObject.getString(OWM_LOCATION_SETTING);
 
             // Get longitude & latitude
             JSONObject coordObject = cityObject.getJSONObject(OWM_COORDINATES);
@@ -223,10 +230,10 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
             // Utilize iteration to go through the number of days specified and store the outcome
             // in an array to be returned by this method
-            Vector<ContentValues> contentValuesVector = new Vector<>(numDays);
-            String[] resultStrs = new String[numDays];
+            Vector<ContentValues> contentValuesVector = new Vector<>(weatherArray.length());
+            String[] resultStrs = new String[weatherArray.length()];
 
-            for (int i = 0; i < numDays; i++) {
+            for (int i = 0; i < weatherArray.length(); i++) {
                 // Get the individual JSONObject day from the JSONArray
                 JSONObject dayObject = weatherArray.getJSONObject(i);
 
@@ -247,14 +254,14 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
                 double degrees = dayObject.getDouble(OWM_DEGREES);
 
                 // Parse temperature in high/low, rounding fractions of a degree
-                String highLowStr = formatHighLows(highTemperature, lowTemperature);
+//                String highLowStr = formatHighLows(highTemperature, lowTemperature);
 
                 // Set the day/time utilizing the dayTime object created above and parse it to
                 // human readable date/time
                 long dateTime = dayTime.setJulianDay(julianStartDay + i);
-                String day = getReadableDateString(dateTime);
+//                String day = getReadableDateString(dateTime);
 
-                resultStrs[i] = day + " - " + description + " - " + highLowStr;
+//                resultStrs[i] = day + " - " + description + " - " + highLowStr;
 
                 // Add all the values to the ContentValues and then add it to the Vector
                 ContentValues cv = new ContentValues();
@@ -277,50 +284,51 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             if (contentValuesVector.size() > 0) {
                 // Bulk insert takes an array of ContentValues so the Vector needs to be converted
                 // to an Array
-                ContentValues[] cvArray = new ContentValues[numDays];
+                ContentValues[] cvArray = new ContentValues[weatherArray.length()];
                 contentValuesVector.toArray(cvArray);
                 rows = context.getContentResolver().bulkInsert(WeatherEntry.CONTENT_URI, cvArray);
             }
 
-            // Query the database for the data that was just stored to display it in the primitive UX
-            // currently being used and also to check that the data was correctly and successfully
-            // inserted
-
-            // Set the sortOrder Ascending, by date
-            String sortOrder = WeatherEntry.COLUMN_DATE + " ASC";
-
-            // Retrieve the URI for the weatherForLocationWithStartDate
-            Uri weatherForLocationUri = WeatherEntry.buildWeatherLocationWithStartDate(
-                    locationSetting,
-                    System.currentTimeMillis()
-            );
-
-            // Store the queried values into a new ContentValues Vector and utilize a helper method to
-            // parse it back into a string value for the UX
-            Cursor cursor = context.getContentResolver().query(
-                    weatherForLocationUri,
-                    null,
-                    null,
-                    null,
-                    sortOrder
-            );
-
-            // Create a new Vector initialized with the number of rows the cursor returns
-            contentValuesVector = new Vector<>(cursor.getCount());
-
-            if (cursor.moveToFirst()) {
-                // If the cursor returns rows, convert the cursor data to ContentValues and add it
-                // to the Vector
-                do {
-                    ContentValues cv = new ContentValues();
-                    DatabaseUtils.cursorRowToContentValues(cursor, cv);
-                    contentValuesVector.add(cv);
-                } while (cursor.moveToNext());
-            }
+//            // Query the database for the data that was just stored to display it in the primitive UX
+//            // currently being used and also to check that the data was correctly and successfully
+//            // inserted
+//
+//            // Set the sortOrder Ascending, by date
+//            String sortOrder = WeatherEntry.COLUMN_DATE + " ASC";
+//
+//            // Retrieve the URI for the weatherForLocationWithStartDate
+//            Uri weatherForLocationUri = WeatherEntry.buildWeatherLocationWithStartDate(
+//                    locationSetting,
+//                    System.currentTimeMillis()
+//            );
+//
+//            // Store the queried values into a new ContentValues Vector and utilize a helper method to
+//            // parse it back into a string value for the UX
+//            Cursor cursor = context.getContentResolver().query(
+//                    weatherForLocationUri,
+//                    null,
+//                    null,
+//                    null,
+//                    sortOrder
+//            );
+//
+//            // Create a new Vector initialized with the number of rows the cursor returns
+//            contentValuesVector = new Vector<>(cursor.getCount());
+//            Log.v(LOG_TAG, "Cursor #2 found " + cursor.getCount() + " rows!");
+//
+//            if (cursor.moveToFirst()) {
+//                // If the cursor returns rows, convert the cursor data to ContentValues and add it
+//                // to the Vector
+//                do {
+//                    ContentValues cv = new ContentValues();
+//                    DatabaseUtils.cursorRowToContentValues(cursor, cv);
+//                    contentValuesVector.add(cv);
+//                } while (cursor.moveToNext());
+//            }
 
             Log.v(LOG_TAG, "FetchWeatherTask complete. " + rows + " inserted into database!");
 
-            resultStrs = convertContentValuesToUXFormat(contentValuesVector);
+//            resultStrs = convertContentValuesToUXFormat(contentValuesVector);
             return resultStrs;
 
         } catch (JSONException e) {
@@ -342,7 +350,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         // Additional variables that will temporarily be held here until they are user configurable
         String format = "json";
         String units = "metric";
-        int numDays = 7;
+        int numDays = 14;
 
         try {
             // Construct the URL for the OpenWeatherMap query
@@ -358,7 +366,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             final String UNITS_PARAM = "units";
             final String DAYS_PARAMS = "cnt";
             final String API_PARAM = "APPID";
-            String zipCode = params[0];
+            String locationQuery = params[0];
 
             // Deprecated
 //            Uri.Builder builder = new Uri.Builder();
@@ -376,7 +384,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
             Uri forecastUri = Uri.parse("http://api.openweathermap.org/data/2.5/forecast/daily?")
                     .buildUpon()
-                    .appendQueryParameter(QUERY_PARAM, zipCode)
+                    .appendQueryParameter(QUERY_PARAM, locationQuery)
                     .appendQueryParameter(FORMAT_PARAMS, format)
                     .appendQueryParameter(UNITS_PARAM, units)
                     .appendQueryParameter(DAYS_PARAMS, Integer.toString(numDays))
@@ -419,7 +427,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
             forecastJsonStr = buffer.toString();
             // Parse the JSON String
             try {
-                return getWeatherDataFromString(forecastJsonStr, numDays);
+                return getWeatherDataFromString(forecastJsonStr, locationQuery);
             } catch (JSONException e) {
                 Log.d(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
@@ -448,16 +456,16 @@ public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
         return null;
     }
 
-    @Override
-    protected void onPostExecute(String[] result) {
-        /*
-         * Update the forecastAdapter with the new data from OpenWeatherMap
-         */
-        if (result != null) {
-            forecastAdapter.clear();
-            for (String s : result) {
-                forecastAdapter.add(s);
-            }
-        }
-    }
+//    @Override
+//    protected void onPostExecute(String[] result) {
+//        /*
+//         * Update the forecastAdapter with the new data from OpenWeatherMap
+//         */
+//        if (result != null) {
+//            forecastAdapter.clear();
+//            for (String s : result) {
+//                forecastAdapter.add(s);
+//            }
+//        }
+//    }
 }
