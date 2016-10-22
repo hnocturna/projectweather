@@ -12,15 +12,19 @@ import android.view.MenuItem;
 
 public class MainActivity extends ActionBarActivity {
     private final String LOG_TAG = MainActivity.class.getSimpleName();
+    private final String FORECASTFRAGMENT_TAG = "forecast fragment";
+    private String location;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment())
+                    .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
                     .commit();
         }
+        location = Utility.getPreferredLocation(this);
     }
 
     @Override
@@ -69,4 +73,24 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        // If the stored location is different than the location in the SharedPreferences, update
+        // the data being displayed with the new location and then set the current location to the
+        // one stored in the SharedPreferences
+        if (!location.equals(Utility.getPreferredLocation(this))) {
+            // Call the onLocationChanged method in the instanced ForecastFragment to update the
+            // weather
+            ForecastFragment forecastFragment = (ForecastFragment) getSupportFragmentManager()
+                    .findFragmentByTag(FORECASTFRAGMENT_TAG);
+            if (forecastFragment != null) {
+                forecastFragment.onLocationChanged();
+            }
+
+            // Set the current location to the location in SharedPreferences
+            location = Utility.getPreferredLocation(this);
+        }
+
+        super.onResume();
+    }
 }

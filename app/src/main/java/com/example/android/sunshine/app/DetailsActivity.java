@@ -1,9 +1,14 @@
 package com.example.android.sunshine.app;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.ShareActionProvider;
@@ -14,6 +19,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
+
+import org.apache.http.impl.DefaultHttpServerConnection;
 
 public class DetailsActivity extends ActionBarActivity {
     private static String forecastStr;
@@ -80,7 +89,23 @@ public class DetailsActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class DetailFragment extends Fragment {
+    public static class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+        private static final String LOG_TAG = DetailFragment.class.getSimpleName();
+        private static final int DETAILS_LOADER = 0;
+
+        private static final String[] DETAILS_COLUMNS = new String[]{
+                WeatherEntry.TABLE_NAME + "." + WeatherEntry._ID,
+                WeatherEntry.COLUMN_DATE,
+                WeatherEntry.COLUMN_SHORT_DESC,
+                WeatherEntry.COLUMN_MIN_TEMP,
+                WeatherEntry.COLUMN_MAX_TEMP
+        };
+
+        static final int COL_WEATHER_ID = 0;
+        static final int COL_DATE = 1;
+        static final int COL_WEATHER_SHORT_DESC = 2;
+        static final int COL_WEATHER_MIN = 3;
+        static final int COL_WEATHER_MAX = 4;
 
         public DetailFragment() {
             setHasOptionsMenu(true);
@@ -91,18 +116,86 @@ public class DetailsActivity extends ActionBarActivity {
                                  Bundle savedInstanceState) {
 
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-            Intent intent = getActivity().getIntent();
 
-            if (intent != null) {
-                Uri weatherUri = intent.getData();
-                forecastStr = weatherUri.toString();
-            } else {
-                return rootView;
-            }
 
-            TextView forecastTextView = (TextView) rootView.findViewById(R.id.detail_text);
-            forecastTextView.setText(forecastStr);
+//            // Deprecated
+//
+//            Intent intent = getActivity().getIntent();
+//            Uri weatherUri = null;
+//
+//            if (intent != null) {
+//                weatherUri = intent.getData();
+//                forecastStr = weatherUri.toString();
+//            } else {
+//                return rootView;
+//            }
+//
+//            forecastTextView = (TextView) rootView.findViewById(R.id.detail_text);
+//            forecastTextView.setText(forecastStr);
+
             return rootView;
         }
+
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            Log.v(LOG_TAG, "In onCreateLoader");
+            // Retrieve the URI from the intent passed from the ForecastFragment
+            Intent intent = getActivity().getIntent();
+            Uri weatherWithLocationAndDateUri = intent.getData();
+
+            // Return CursorLoader with the URI and the projection created in the DetailsFragment
+            return new CursorLoader(
+                    getActivity(),
+                    weatherWithLocationAndDateUri,
+                    DETAILS_COLUMNS,
+                    null,
+                    null,
+                    null
+            );
+
+
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+            Log.v(LOG_TAG, "In onLoadFinished");
+            Log.v(LOG_TAG, "Row returned by cursor: " + cursor.moveToFirst());
+            // If cursor doesn't return any data, finish
+            if (!cursor.moveToFirst()) {
+                return;
+            }
+
+            // The cursor data needs to be converted to user-readable String using the methods in
+            // Utility.class
+            boolean isMetric = Utility.isMetric(getActivity());
+            String date = Utility.formatDate(cursor.getLong(COL_DATE));
+            String description = cursor.getString(COL_WEATHER_SHORT_DESC);
+            String highTemperatures = Utility.formatTemperature(
+                    cursor.getDouble(COL_WEATHER_MAX),
+                    isMetric
+            );
+            String lowTemperatures = Utility.formatTemperature(
+                    cursor.getDouble(COL_WEATHER_MIN),
+                    isMetric
+            );
+
+            String weatherString = String.format("%s - %s - %s/%s", date, description, highTemperatures, lowTemperatures);
+
+            // Set the TextView in the DetailsFragment to the String that was just generated
+            TextView textView = (TextView) getView().findViewById(R.id.detail_text);
+            textView.setText(weatherString);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+
+        }
+
+        @Override
+        public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+            getLoaderManager().initLoader(DETAILS_LOADER, null, this);
+            super.onActivityCreated(savedInstanceState);
+        }
     }
+
 }

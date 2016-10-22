@@ -165,7 +165,6 @@ public class WeatherProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor;
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
         switch (uriMatcher.match(uri)) {
             // weather/*/#
             case WEATHER_WITH_LOCATION_AND_DATE: {

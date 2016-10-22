@@ -129,10 +129,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         forecastAdapter.swapCursor(cursor);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
+    /*
+     * Helper method to update the weather and reset the loader
+     */
+    public void onLocationChanged() {
         updateWeather();
+        getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 
     private void updateWeather() {
