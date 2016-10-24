@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- For Android versions ICS and above, use this selector as API 21 and above have the "ripple"
+animation -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- For when an item has been selected -->
+    <item android:state_activated="true"
+        android:drawable="@color/sunshine_light_blue" />
+
+    <!-- For when an item as actively being pressed -->
+    <item android:state_pressed="true">
+        <ripple android:color="@color/grey" />
+    </item>
+
+    <!-- Default state -->
+    <item android:drawable="@android:color/transparent" />
+</selector>

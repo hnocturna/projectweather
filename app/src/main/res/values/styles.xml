@@ -1,8 +1,23 @@
-<resources>
+<resources xmlns:item="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/sunshine_blue</item>
+        <item name="colorPrimaryDark">@color/sunshine_dark_blue</item>
     </style>
 
+    <!-- MainActivity theme -->
+    <style name="ForecastTheme" parent="AppTheme">
+        <item name="actionBarStyle">@style/ActionBar.Solid.Sunshine.NoTitle</item>
+    </style>
+
+    <!-- MainActivity ActionBar theme -->
+    <style name="ActionBar.Solid.Sunshine.NoTitle" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="displayOptions">useLogo|showHome</item>
+        <item name="logo">@drawable/ic_logo</item>
+    </style>
+
+    <style name="ForecastListStyles">
+        <!-- Stub because choiceMode doesn't matter when an activity is launched -->
+    </style>
 </resources>

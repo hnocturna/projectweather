@@ -8,13 +8,13 @@
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="16dp"
+    android:background="@drawable/touch_selector"
     >
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/list_item_icon"
-        android:src="@drawable/ic_launcher"
         />
 
     <LinearLayout
@@ -29,14 +29,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_date_text"
-            android:text="Tomorrow"
             />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_detail_text"
-            android:text="Hazy"
             />
 
     </LinearLayout>
@@ -52,14 +50,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_high_text"
-            android:text="22"
             />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_low_text"
-            android:text="18"
             />
 
     </LinearLayout>

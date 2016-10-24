@@ -10,19 +10,36 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback{
     private final String LOG_TAG = MainActivity.class.getSimpleName();
-    private final String FORECASTFRAGMENT_TAG = "forecast fragment";
+    private final String DETAILFRAGMENT_TAG = "DFTAG";
     private String location;
+    private boolean twoPane;
+    private Uri uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
-                    .commit();
+        // Check whether there are two panes in the MainActivity (the layout will be decided based
+        // on the smallest width of the device.
+        if (findViewById(R.id.weather_detail_container) == null) {
+            // If there is one pane, nothing needs to be done except set the boolean to false
+            twoPane = false;
+            getSupportActionBar().setElevation(0);
+        } else {
+            // If there are two panes:
+            // Set the boolean to true
+            twoPane = true;
+            // Populate the container with a new DetailsFragment
+            if (savedInstanceState == null) {       // If the screen is rotated, the system will automatically restore the DetailsFragment that was there before the rotation
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.weather_detail_container, new DetailsFragment(), DETAILFRAGMENT_TAG)
+                        .commit();
+            }
+            ForecastFragment forecastFragment = (ForecastFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.fragment_forecast);
+            forecastFragment.setUseTodayLayout(!twoPane);
         }
         location = Utility.getPreferredLocation(this);
     }
@@ -82,15 +99,48 @@ public class MainActivity extends ActionBarActivity {
             // Call the onLocationChanged method in the instanced ForecastFragment to update the
             // weather
             ForecastFragment forecastFragment = (ForecastFragment) getSupportFragmentManager()
-                    .findFragmentByTag(FORECASTFRAGMENT_TAG);
+                    .findFragmentById(R.id.fragment_forecast);
             if (forecastFragment != null) {
                 forecastFragment.onLocationChanged();
             }
+            DetailsFragment detailsFragment = (DetailsFragment) getSupportFragmentManager()
+                    .findFragmentByTag(DETAILFRAGMENT_TAG);
+            detailsFragment.onLocationChanged(Utility.getPreferredLocation(this));
 
             // Set the current location to the location in SharedPreferences
             location = Utility.getPreferredLocation(this);
         }
-
         super.onResume();
+    }
+
+    /**
+     * Callback interface from ForecastFragment that passes the data from the item selected back
+     * to the MainActivity so that it can correctly pass the data to either the DetailsFragment
+     * in the master/detail flow or start a new DetailsActivity depending on whether the app
+     * is in two-pane or one-pane mode
+     *
+     * @param dateUri The URI of the date and location selected in the ForecastFragment
+      */
+    @Override
+    public void onItemSelected(Uri dateUri) {
+        uri = dateUri;
+        if (twoPane) {
+            // Pass the URI as a Bundle argument. Bundle arguments cannot be changed once they have
+            // been passed. This is useful because if the fragment is destroyed on rotation, the
+            // bundle will remain the same
+            Bundle args = new Bundle();
+            args.putParcelable(DetailsFragment.DETAIL_URI, dateUri);
+
+            DetailsFragment detailsFragment = new DetailsFragment();
+            detailsFragment.setArguments(args);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, detailsFragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else {
+            // If single pane, start a new DetailsActivity by passing in the URI through the intent
+            Intent intent = new Intent(this, DetailsActivity.class)
+                    .setData(dateUri);
+            startActivity(intent);
+        }
     }
 }

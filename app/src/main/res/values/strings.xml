@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:xliff="http://schemas.android.com/tools">
 
     <string name="app_name">Sunshine</string>
     <string name="hello_world">Hello world!</string>
@@ -25,5 +25,19 @@
     <string name="pref_units_key" translatable="false">units</string>
     <string name="pref_units_metric" translatable="false">metric</string>
     <string name="pref_units_imperial" translatable="false">imperial</string>
+
+    <!-- Labels for dates -->
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="format_full_friendly_date"><xliff:g id="day">%1$s</xliff:g>, <xliff:g id="date">%2$s</xliff:g></string>
+
+    <!-- String format for units -->
+    <string name="format_temperature"><xliff:g id="temperature">%1.0f</xliff:g>\u00B0</string>
+
+    <!-- String format for details screen -->
+    <string name="format_humidity">Humidity: <xliff:g id="humidity">%1.0f</xliff:g>%%</string>
+    <string name="format_pressure">Pressure: <xliff:g id="pressure">%1.0f</xliff:g> kPa</string>
+    <string name="format_wind_kmh">Wind: <xliff:g id="wind_speed">%1.0f</xliff:g> km/h <xliff:g id="wind_direction">%s</xliff:g></string>
+    <string name="format_wind_mph">Wind: <xliff:g id="wind_speed">%1.0f</xliff:g> mph <xliff:g id="wind_direction">%s</xliff:g></string>
 
 </resources>

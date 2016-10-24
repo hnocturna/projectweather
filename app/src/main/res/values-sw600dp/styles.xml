@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- For style selection when in two-pane tablet mode -->
+<resources>
+    <style name="ForecastListStyles">
+        <item name="android:choiceMode">singleChoice</item>
+    </style>
+</resources>

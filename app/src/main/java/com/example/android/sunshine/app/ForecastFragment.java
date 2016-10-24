@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,7 +32,11 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     final private String LOG_TAG = ForecastFragment.class.getSimpleName();
     private ForecastAdapter forecastAdapter;
+    private int cursorPosition;
+    private ListView listView;
     private static final int FORECAST_LOADER = 0;
+    private static final String SELECTED_KEY = "SELECTION";
+    private boolean useTodayLayout = true;
 
     // Project used when querying data from the database so that column indices are constant. This
     // allows the Cursor.get functions to utilize static variables instead of getColumnIndex.
@@ -73,12 +78,24 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            cursorPosition = savedInstanceState.getInt(SELECTED_KEY);
+        }
         setHasOptionsMenu(true);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.forecastfragment, menu);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if (cursorPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SELECTED_KEY, cursorPosition);
+        }
+        super.onSaveInstanceState(outState);
+
     }
 
     @Override
@@ -127,6 +144,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         forecastAdapter.swapCursor(cursor);
+        if (cursorPosition != ListView.INVALID_POSITION) {
+            listView.smoothScrollToPosition(cursorPosition);
+        }
     }
 
     /*
@@ -187,36 +207,43 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 //        Log.v(LOG_TAG, "sortOrder: " + sortOrder);
 //
         forecastAdapter = new ForecastAdapter(getActivity(), null, 0);
+        forecastAdapter.setUseTodayLayout(useTodayLayout);
 
         // Get a reference to the ListView and attach the adapter
-        ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
+        listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(forecastAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(i);
+                cursorPosition = i;
                 if (cursor != null) {
                     // If the cursor does not return null, build the URI for the location and date
                     // selected
                     String locationSetting = Utility.getPreferredLocation(getActivity());
 
-                    Uri weatherForLocationAndDateUri = WeatherEntry.buildWeatherLocationWithDate(
+                    ((Callback) getActivity()).onItemSelected(WeatherEntry.buildWeatherLocationWithDate(
                             locationSetting,
                             cursor.getLong(COL_WEATHER_DATE)
-                    );
-
-                    // Start the DetailsActivity by passing the URI for the row that will be used
-                    // to populate the details
-                    Intent intent = new Intent(getActivity(), DetailsActivity.class);
-                    intent.setData(weatherForLocationAndDateUri);
-                    startActivity(intent);
+                    ));
                 }
+
             }
         });
 
         return rootView;
     }
 
+    public void setUseTodayLayout(boolean useTodayLayout) {
+        this.useTodayLayout = useTodayLayout;
+        if (forecastAdapter != null) {
+            forecastAdapter.setUseTodayLayout(useTodayLayout);
+        }
+    }
+
+    public interface Callback {
+        public void onItemSelected(Uri dateUri);
+    }
 
 }

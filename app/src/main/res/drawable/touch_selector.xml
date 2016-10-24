@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- For when an item has been selected -->
+    <item android:state_activated="true"
+        android:drawable="@color/sunshine_light_blue" />
+
+    <!-- For when an item is being pressed. Immediately fades when touch is released -->
+    <item android:state_pressed="true"
+        android:drawable="@color/grey" />
+
+    <!-- Normal color when neither of the above states are in use (i.e. default) -->
+    <item android:drawable="@android:color/transparent" />
+</selector>
