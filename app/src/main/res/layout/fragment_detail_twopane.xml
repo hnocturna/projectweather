@@ -22,11 +22,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/detail_day_text"
+                style="@style/detail_day_text"
                 />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/detail_date_text"
+                style="@style/detail_date_text"
                 />
         </LinearLayout>
 
@@ -41,12 +43,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/detail_high_text"
+                style="@style/detail_high_text"
                 />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/detail_low_text"
+                style="@style/detail_low_text"
                 />
 
             <!-- Humidity, wind, & pressre -->
@@ -54,18 +58,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/detail_humidity_text"
+                style="@style/detail_misc_text"
+                android:layout_marginTop="0dp"
                 />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/detail_wind_text"
+                style="@style/detail_misc_text"
                 />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/detail_pressure_text"
+                style="@style/detail_misc_text"
                 />
         </LinearLayout>
 
@@ -86,6 +94,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/detail_description_text"
+                style="@style/detail_description_text"
                 />
         </LinearLayout>
 

@@ -26,7 +26,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         if (findViewById(R.id.weather_detail_container) == null) {
             // If there is one pane, nothing needs to be done except set the boolean to false
             twoPane = false;
-            getSupportActionBar().setElevation(0);
+            getSupportActionBar().setElevation(0f);
         } else {
             // If there are two panes:
             // Set the boolean to true
