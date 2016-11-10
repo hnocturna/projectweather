@@ -105,8 +105,9 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
             }
             DetailsFragment detailsFragment = (DetailsFragment) getSupportFragmentManager()
                     .findFragmentByTag(DETAILFRAGMENT_TAG);
-            detailsFragment.onLocationChanged(Utility.getPreferredLocation(this));
-
+            if (detailsFragment != null) {
+                detailsFragment.onLocationChanged(Utility.getPreferredLocation(this));
+            }
             // Set the current location to the location in SharedPreferences
             location = Utility.getPreferredLocation(this);
         }

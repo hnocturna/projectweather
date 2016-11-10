@@ -1,5 +1,8 @@
 package com.example.android.sunshine.app;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -24,6 +27,7 @@ import android.widget.ListView;
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
 import com.example.android.sunshine.app.data.WeatherContract.LocationEntry;
+import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -81,6 +85,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
             cursorPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
+
         setHasOptionsMenu(true);
     }
 
@@ -104,7 +109,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         if (id == R.id.action_refresh) {
             // Temporary debug button to test FetchWeatherTask
             updateWeather();
-
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -157,13 +161,11 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 
+    /**
+     * Updates the weather utilizing a background service
+     */
     private void updateWeather() {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        // If no user location is set, then retrieve the default zip code defined as "92646"
-        String location = pref.getString(getString(R.string.pref_location_key),
-                getString(R.string.pref_location_default));
-        // getActivity().deleteDatabase(WeatherDbHelper.DATABASE_NAME);
-        new FetchWeatherTask(getActivity()).execute(location);
+        SunshineSyncAdapter.syncImmediately(getActivity());
     }
 
     @Override

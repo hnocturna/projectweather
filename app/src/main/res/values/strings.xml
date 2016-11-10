@@ -40,4 +40,7 @@
     <string name="format_wind_kmh">Wind: <xliff:g id="wind_speed">%1.0f</xliff:g> km/h <xliff:g id="wind_direction">%s</xliff:g></string>
     <string name="format_wind_mph">Wind: <xliff:g id="wind_speed">%1.0f</xliff:g> mph <xliff:g id="wind_direction">%s</xliff:g></string>
 
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">sunshine.example.com</string>
+    <string name="content_authority">com.example.android.sunshine.app</string>
 </resources>
