@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 
 /**
  * Created by hnoct on 11/9/2016.
+ * Allows framework to access SunshineAuthenticator. Pretty much a stub.
  */
 
 public class SunshineAuthenticatorService extends Service {

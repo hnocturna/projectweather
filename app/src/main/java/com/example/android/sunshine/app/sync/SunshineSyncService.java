@@ -8,6 +8,7 @@ import android.util.Log;
 
 /**
  * Created by hnoct on 11/9/2016.
+ * Provides framework access to SunshineSyncAdapter. Also pretty much a stub
  */
 
 public class SunshineSyncService extends Service {

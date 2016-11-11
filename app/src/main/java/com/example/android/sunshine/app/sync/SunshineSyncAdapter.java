@@ -8,9 +8,11 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.format.Time;
 import android.util.Log;
@@ -40,11 +42,19 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     private final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
     private Context context;
 
+    // Interval at which to sync with weather, in seconds (60 seconds x 180 min = 3 hours)
+    public static final int SYNC_INTERVAL = 60 * 180;
+    public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
+
     public SunshineSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         this.context = context;
     }
 
+    /**
+     * Method that is called when sync occurs, updating the weather database with the data from
+     * OpenWeatherMap
+     */
     @Override
     public void onPerformSync(Account account, Bundle bundle, String s, ContentProviderClient contentProviderClient, SyncResult syncResult) {
         Log.d(LOG_TAG, "onPerformSync called.");
@@ -152,6 +162,13 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         ContentResolver.requestSync(getSyncAccount(context), context.getString(R.string.content_authority), bundle);
     }
 
+    /**
+     * Helper method for checking whether an account exists. If it does not, this method creates a
+     * dummy account. If an account is created, onAccountCreated method is called to initialize it
+     *
+     * @param context used to access account service
+     * @return fake account
+     */
     public static Account getSyncAccount(Context context) {
         // Retrieve instance of Android AccountManager
         AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
@@ -168,8 +185,46 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             if (!accountManager.addAccountExplicitly(newAccount, "", null)) {
                 return null;
             }
+            onAccountCreated(newAccount, context);
         }
         return newAccount;
+    }
+
+    public static void configurePeriodicSync(Context context, int syncInterval, int flexTime) {
+        Account account = getSyncAccount(context);
+        String authority = context.getString(R.string.content_authority);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // Enable inexact timers in periodic sync for Kitkat and above
+            SyncRequest request = new SyncRequest.Builder()
+                    .syncPeriodic(syncInterval, flexTime)
+                    .setSyncAdapter(account, authority)
+                    .setExtras(new Bundle())
+                    .build();
+            ContentResolver.requestSync(request);
+        } else {
+            // Otherwise we must use an exact timer
+            ContentResolver.addPeriodicSync(account, authority, new Bundle(), syncInterval);
+        }
+    }
+
+    /**
+     * Helper method for when a new account is created to set up sync settings and being first sync
+     * @param newAccount dummy account
+     * @param context for accessing string parameters and passing to called methods
+     */
+    private static void onAccountCreated(Account newAccount, Context context) {
+        // Since an acocunt has been created
+        SunshineSyncAdapter.configurePeriodicSync(context, SYNC_INTERVAL, SYNC_FLEXTIME);
+
+        // Enable periodic sync
+        ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.content_authority), true);
+
+        // Sync
+        syncImmediately(context);
+    }
+
+    public static void intitializeSyncAdapter(Context context) {
+        getSyncAccount(context);
     }
 
     /*

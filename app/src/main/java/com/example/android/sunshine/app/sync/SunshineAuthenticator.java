@@ -9,7 +9,8 @@ import android.os.Bundle;
 
 /**
  * Created by hnoct on 11/9/2016.
- * Since OpenWeatherMap does not require authentication, this is just a stub.
+ * Manages authenticating with Sunshine's background service. Since OpenWeatherMap does not require
+ * authentication, this is just a stub.
  */
 
 public class SunshineAuthenticator extends AbstractAccountAuthenticator {
