@@ -2,25 +2,35 @@ package com.example.android.sunshine.app.sync;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.text.format.Time;
 import android.util.Log;
 
 import com.example.android.sunshine.app.BuildConfig;
+import com.example.android.sunshine.app.DetailsActivity;
+import com.example.android.sunshine.app.MainActivity;
 import com.example.android.sunshine.app.R;
 import com.example.android.sunshine.app.Utility;
 import com.example.android.sunshine.app.data.WeatherContract;
+import com.example.android.sunshine.app.data.WeatherProvider;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,6 +42,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import java.util.Vector;
 
 /**
@@ -45,6 +58,26 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     // Interval at which to sync with weather, in seconds (60 seconds x 180 min = 3 hours)
     public static final int SYNC_INTERVAL = 60 * 180;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
+
+    // Projection for NOTIFICATION text
+    private static final String[] NOTIFY_WEATHER_PROJECTION = new String[]{
+            WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
+            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
+            WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
+            WeatherContract.WeatherEntry.COLUMN_SHORT_DESC
+    };
+
+    // Indices for the projection
+    private static final int COL_WEATHER_ID = 0;
+    private static final int COL_MAX_TEMP = 1;
+    private static final int COL_MIN_TEMP = 2;
+    private static final int COL_SHORT_DESC = 3;
+
+    // Other related constants
+    private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
+    private static final int WEATHER_NOTIFICATION_ID = 3004;
+
+    private static final String NOTIFICATION = "notified";
 
     public SunshineSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -389,6 +422,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 rows = context.getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI, cvArray);
             }
 
+            notifyWeather();
+
             Log.v(LOG_TAG, "FetchWeatherTask complete. " + rows + " inserted into database!");
 
             return resultStrs;
@@ -398,6 +433,92 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private void notifyWeather() {
+        // Check when the last notification occurred and notify if it's the first of the day.
+        // TODO: Change so notification is shown in the morning every day. Makes no sense to wait.
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        String lastNotificationKey = context.getString(R.string.last_notification);
+
+        long lastNotify = prefs.getLong(lastNotificationKey, 0);
+        long currentTime = System.currentTimeMillis();
+
+        if (currentTime - lastNotify < DAY_IN_MILLIS) {
+            // Nothing to do if last notification was less then 24hrs ago
+            return;
+        } else {
+            // Send notification because more than 24hr since last notification
+            String locationQuery = Utility.getPreferredLocation(context);
+            Uri uri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(locationQuery, currentTime);
+
+            // Query weather provider
+            Cursor cursor = context.getContentResolver().query(
+                    uri,
+                    NOTIFY_WEATHER_PROJECTION,
+                    null,
+                    null,
+                    null
+            );
+
+            if (cursor.moveToFirst()) {
+                // Cursor returned a row
+                int weatherId = cursor.getInt(COL_WEATHER_ID);
+                double high = cursor.getDouble(COL_MAX_TEMP);
+                double low = cursor.getDouble(COL_MIN_TEMP);
+                String shortDescription = cursor.getString(COL_SHORT_DESC);
+
+                int iconId = Utility.getIconResourceForWeatherCondition(weatherId);
+                String title = context.getString(R.string.app_name);
+
+                // Define the text of the notification
+                String contentText = String.format(context.getString(R.string.format_notification),
+                        shortDescription,
+                        Utility.formatTemperature(context, high),
+                        Utility.formatTemperature(context, low)
+                );
+
+                // Create the notification
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                        .setSmallIcon(iconId)
+                        .setContentTitle(title)
+                        .setContentText(contentText);
+
+                // Set the notification to open the MainActivity when it is selected (due to tablets
+                // not directly opening DetailsActivity -- Can probably get around this by checking
+                // twoPane later on
+                Intent resultIntent = new Intent(context, MainActivity.class);
+
+                // MainActivity is already at the stop so it is just added as the next Intent
+                TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+                stackBuilder.addNextIntent(resultIntent);
+
+                // Convert the intent to a PendingIntent because it is waiting to be launched on
+                // touch
+                PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+                // Set the intent for the notification touch
+                builder.setContentIntent(resultPendingIntent);
+
+                // Get the NotificationManager and set the notification
+                NotificationManager notificationManager = (NotificationManager)
+                        context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+                notificationManager.notify(WEATHER_NOTIFICATION_ID, builder.build());
+            }
+            // Close the cursor
+            cursor.close();
+
+            // Store the time of this notification so that it can be checked prior to the next
+            // notification
+            prefs.edit()
+                    .putLong(NOTIFICATION, System.currentTimeMillis())
+                    .commit();
+        }
+        Log.v(LOG_TAG, "Notification sent!");
     }
 
 }

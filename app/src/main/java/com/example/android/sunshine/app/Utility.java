@@ -165,6 +165,16 @@ public class Utility {
         return context.getString(R.string.format_temperature, temp);
     }
 
+    /**
+     * Overload of the formatTemperature method for access in other classes
+     * @param context for accessing SharedPreferences
+     * @param temperature from database
+     * @return temperature formatted in either metric or imperial based on user preferences
+     */
+    public static String formatTemperature(Context context, double temperature) {
+        return formatTemperature(context, temperature, isMetric(context));
+    }
+
     /*
      * Formats the date into a user-readable String
      */
