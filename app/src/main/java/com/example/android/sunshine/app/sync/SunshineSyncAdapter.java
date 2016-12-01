@@ -25,12 +25,10 @@ import android.text.format.Time;
 import android.util.Log;
 
 import com.example.android.sunshine.app.BuildConfig;
-import com.example.android.sunshine.app.DetailsActivity;
 import com.example.android.sunshine.app.MainActivity;
 import com.example.android.sunshine.app.R;
 import com.example.android.sunshine.app.Utility;
 import com.example.android.sunshine.app.data.WeatherContract;
-import com.example.android.sunshine.app.data.WeatherProvider;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,8 +41,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 import java.util.Vector;
 
 /**
@@ -64,7 +60,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             WeatherContract.WeatherEntry.COLUMN_WEATHER_ID,
             WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
             WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
-            WeatherContract.WeatherEntry.COLUMN_SHORT_DESC
+            WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
+            WeatherContract.WeatherEntry.COLUMN_DATE
     };
 
     // Indices for the projection
@@ -72,6 +69,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int COL_MAX_TEMP = 1;
     private static final int COL_MIN_TEMP = 2;
     private static final int COL_SHORT_DESC = 3;
+    private static final int COL_DATE = 4;
 
     // Other related constants
     private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
@@ -193,6 +191,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         ContentResolver.requestSync(getSyncAccount(context), context.getString(R.string.content_authority), bundle);
+
     }
 
     /**
@@ -422,9 +421,19 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 rows = context.getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI, cvArray);
             }
 
+            // Removes data entries that are older than a day so that the app doesn't continually
+            // fill up the device storage.
+            // i.e. delete WHERE date <= ? {'yesterday'}
+            long rowsDeleted = context.getContentResolver().delete(
+                    WeatherContract.WeatherEntry.CONTENT_URI,
+                    WeatherContract.WeatherEntry.COLUMN_DATE + " <= ?",
+                    new String[] {Long.toString(dayTime.setJulianDay(julianStartDay - 1))}
+            );
+
             notifyWeather();
 
             Log.v(LOG_TAG, "FetchWeatherTask complete. " + rows + " inserted into database!");
+            Log.v(LOG_TAG, rowsDeleted + " old rows removed!");
 
             return resultStrs;
 
@@ -440,11 +449,13 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         // TODO: Change so notification is shown in the morning every day. Makes no sense to wait.
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String lastNotificationKey = context.getString(R.string.last_notification);
+        String notificationKey = context.getString(R.string.pref_notifications_key);
+        boolean notifications = prefs.getBoolean(notificationKey, Boolean.parseBoolean(context.getString(R.string.pref_notifications_default)));
 
         long lastNotify = prefs.getLong(lastNotificationKey, 0);
         long currentTime = System.currentTimeMillis();
 
-        if (currentTime - lastNotify < DAY_IN_MILLIS) {
+        if (currentTime - lastNotify < DAY_IN_MILLIS || !notifications) {
             // Nothing to do if last notification was less then 24hrs ago
             return;
         } else {

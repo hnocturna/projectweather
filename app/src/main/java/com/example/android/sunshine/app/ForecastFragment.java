@@ -106,9 +106,13 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_refresh) {
+        /* if (id == R.id.action_refresh) {
             // Temporary debug button to test FetchWeatherTask
             updateWeather();
+            return true;
+        } */
+        if (id == R.id.action_map) {
+            openPreferredLocationInMap();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -241,6 +245,26 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         this.useTodayLayout = useTodayLayout;
         if (forecastAdapter != null) {
             forecastAdapter.setUseTodayLayout(useTodayLayout);
+        }
+    }
+
+    private void openPreferredLocationInMap() {
+        Cursor cursor = forecastAdapter.getCursor();
+
+        if (cursor.moveToFirst()) {
+            String posLong = cursor.getString(COL_COORD_LONG);
+            String posLat = cursor.getString(COL_COORD_LAT);
+
+            String geo = "geo:" + posLat + "," + posLong;
+            Log.v(LOG_TAG, "Map query: " + geo);
+            Uri geoLocation = Uri.parse(geo);
+
+            Intent intent = new Intent(Intent.ACTION_VIEW, geoLocation);
+            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                startActivity(intent);
+            } else {
+                Log.d(LOG_TAG, "Couldn't call " + geoLocation.toString() + "; no map application found!");
+            }
         }
     }
 

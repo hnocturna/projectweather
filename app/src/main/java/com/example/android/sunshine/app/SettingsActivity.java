@@ -8,7 +8,6 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 
 /*
  * Activity that displays a list of user-configurable settings
@@ -24,6 +23,7 @@ public class SettingsActivity extends PreferenceActivity
         // Attach OnPreferenceChangeListener so the UI summary can be updated on change
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_location_key)));
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_units_key)));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_notifications_key)));
         // bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_units_key)));
     }
 
@@ -34,10 +34,17 @@ public class SettingsActivity extends PreferenceActivity
     private void bindPreferenceSummaryToValue(Preference preference) {
         preference.setOnPreferenceChangeListener(this);
 
-        onPreferenceChange(preference,
-                PreferenceManager
-                    .getDefaultSharedPreferences(preference.getContext())
-                    .getString(preference.getKey(), ""));
+        if (preference.equals(findPreference(getString(R.string.pref_notifications_key)))) {
+            onPreferenceChange(preference,
+                    PreferenceManager
+                        .getDefaultSharedPreferences(preference.getContext())
+                        .getString((String) preference.getSummary(), ""));
+        } else {
+            onPreferenceChange(preference,
+                    PreferenceManager
+                            .getDefaultSharedPreferences(preference.getContext())
+                            .getString(preference.getKey(), ""));
+        }
     }
 
     @Override
