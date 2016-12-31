@@ -115,6 +115,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
             // Pass the URI as a Bundle argument. Bundle arguments cannot be changed once they have
             // been passed. This is useful because if the fragment is destroyed on rotation, the
             // bundle will remain the same
+            Log.v(LOG_TAG, "twoPane is true?");
             Bundle args = new Bundle();
             args.putParcelable(DetailsFragment.DETAIL_URI, dateUri);
 
@@ -125,6 +126,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
                     .commit();
         } else {
             // If single pane, start a new DetailsActivity by passing in the URI through the intent
+            Log.v(LOG_TAG, "twoPane is false?");
             Intent intent = new Intent(this, DetailsActivity.class)
                     .setData(dateUri);
             startActivity(intent);

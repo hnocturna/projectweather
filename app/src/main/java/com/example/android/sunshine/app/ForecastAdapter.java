@@ -141,14 +141,14 @@ public class ForecastAdapter extends CursorAdapter {
         }
     }
 
-    public static class ViewHolder {
-        public final ImageView iconView;
-        public final TextView dateView;
-        public final TextView descriptionView;
-        public final TextView highView;
-        public final TextView lowView;
+    private static class ViewHolder {
+        final ImageView iconView;
+        final TextView dateView;
+        final TextView descriptionView;
+        final TextView highView;
+        final TextView lowView;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             iconView = (ImageView) view.findViewById(R.id.list_item_icon);
             dateView = (TextView) view.findViewById(R.id.list_item_date_text);
             descriptionView = (TextView) view.findViewById(R.id.list_item_detail_text);

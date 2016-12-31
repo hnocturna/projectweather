@@ -121,6 +121,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         if (uri == null) {
             return null;
         }
+
         // Return CursorLoader with the URI and the projection created in the DetailsFragment
         return new CursorLoader(
                 getActivity(),

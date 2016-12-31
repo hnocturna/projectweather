@@ -5,6 +5,15 @@
     android:layout_height="match_parent"
     tools:context="com.example.android.sunshine.app.ForecastFragment">
 
+    <TextView
+        android:id="@+id/listview_forecast_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="@dimen/default_margin"
+        android:text="@string/empty_forecast_list"
+        />
+
     <ListView
         android:id="@+id/listview_forecast"
         android:layout_width="match_parent"

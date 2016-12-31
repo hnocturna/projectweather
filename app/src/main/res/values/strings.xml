@@ -58,4 +58,7 @@
 
     <!-- Notification preference -->
     <string name="last_notification">last_notification</string>
+
+    <!-- Empty ListView -->
+    <string name="empty_forecast_list">No weather information available</string>
 </resources>
