@@ -60,5 +60,16 @@
     <string name="last_notification">last_notification</string>
 
     <!-- Empty ListView -->
-    <string name="empty_forecast_list">No weather information available</string>
+    <string name="empty_forecast_list">No weather information available.</string>
+    <string name="empty_forecast_list_no_network">"No weather information available \n No network connection to fetch weather"</string>
+    <string name="empty_forecast_list_server_down">"No weather information available. \n The server is not returning data"</string>
+    <string name="empty_forecast_list_server_error">"No weather information available. \n The server is not returning valid data. Please check for an updated version of Sunshine</string>
+    <string name="empty_forecast_list_location_invalid">"No weather information available. \n Invalid location entered. Please enter a new location.</string>
+
+    <!-- SharedPreference key for location status -->
+    <string name="pref_location_status_key">location_status</string>
+
+    <!-- Strings used when displaying the state of the Location in settings -->
+    <string name="pref_location_error_description">Invalid Location (<xliff:g id="location_setting">%1$s</xliff:g>)"</string>
+    <string name="pref_location_unknown_description">Validating Location... (<xliff:g id="location_setting">%1$s</xliff:g>)"</string>
 </resources>
