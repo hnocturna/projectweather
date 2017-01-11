@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "326494878355",
+    "firebase_url": "https://udacity-sunshine-155307.firebaseio.com",
+    "project_id": "udacity-sunshine-155307",
+    "storage_bucket": "udacity-sunshine-155307.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:326494878355:android:83b792e26f07bf18",
+        "android_client_info": {
+          "package_name": "com.example.android.sunshine.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "326494878355-98va0hoe45dccmjd7feiofdnrv6t58bf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

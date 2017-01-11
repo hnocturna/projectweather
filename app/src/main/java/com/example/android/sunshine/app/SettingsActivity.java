@@ -9,6 +9,7 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
@@ -28,6 +29,7 @@ public class SettingsActivity extends PreferenceActivity
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_location_key)));
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_units_key)));
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_notifications_key)));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_icons_key)));
     }
 
     @Override
@@ -45,9 +47,9 @@ public class SettingsActivity extends PreferenceActivity
     }
 
     /*
-             * Attach listener to summary so it's always updated with the current preference value.
-             * Fire once to initialize the summary when the activity is launched.
-             */
+     * Attach listener to summary so it's always updated with the current preference value.
+     * Fire once to initialize the summary when the activity is launched.
+     */
     private void bindPreferenceSummaryToValue(Preference preference) {
         // Set listener to watch for value changes
         preference.setOnPreferenceChangeListener(this);
@@ -82,6 +84,10 @@ public class SettingsActivity extends PreferenceActivity
             // For list preferences, look up the correct display value in the entries list
             ListPreference listPreference = (ListPreference) preference;
             int prefIndex = listPreference.findIndexOfValue(stringValue);
+//            if (key.equals(getString(R.string.pref_icons_key))) {
+//                prefIndex = stringValue.contains("Colored") ? 0 : 1;
+//            }
+            Log.v("FUCK THIS SUMMARY", "StringValue: " + stringValue + " | " + "prefIndex: " + prefIndex);
             if (prefIndex >= 0) {
                 preference.setSummary(listPreference.getEntries()[prefIndex]);
             }
@@ -118,6 +124,8 @@ public class SettingsActivity extends PreferenceActivity
         } else if (key.equals(getString(R.string.pref_location_status_key))) {
             Preference locationPreference = findPreference(getString(R.string.pref_location_key));
             bindPreferenceSummaryToValue(locationPreference);
+        } else if (key.equals(getString(R.string.pref_icons_key))) {
+            getContentResolver().notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null);
         }
     }
 

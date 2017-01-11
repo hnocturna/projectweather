@@ -15,6 +15,7 @@ import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.text.format.Time;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
 import com.example.android.sunshine.app.BuildConfig;
 import com.example.android.sunshine.app.MainActivity;
 import com.example.android.sunshine.app.R;
@@ -46,6 +48,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by hnoct on 11/9/2016.
@@ -511,7 +514,27 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 double low = cursor.getDouble(COL_MIN_TEMP);
                 String shortDescription = cursor.getString(COL_SHORT_DESC);
 
-                int iconId = Utility.getIconResourceForWeatherCondition(weatherId);
+//                int iconId = Utility.getIconResourceForWeatherCondition(weatherId);
+
+                // Get icon dimensions so that Glide can properly load the image to the correct size
+                int largeIconWidth = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
+                        ? context.getResources().getDimensionPixelSize(android.R.dimen.notification_large_icon_width)
+                        : context.getResources().getDimensionPixelSize(R.dimen.notification_large_icon_default);
+
+                // Load the icon as a Bitmap using Glide
+                Bitmap largeIcon = null;
+                try {
+                     largeIcon = Glide.with(context)
+                            .load(Utility.getArtUrlForWeatherCondition(context, weatherId))
+                            .asBitmap()
+                            .error(Utility.getArtResourceForWeatherCondition(weatherId))
+                            .into(largeIconWidth, largeIconWidth)
+                            .get();
+                } catch (InterruptedException | ExecutionException e) {
+                    Log.d(LOG_TAG, "Error downloading icon for notification", e);
+                    e.printStackTrace();
+                }
+
                 String title = context.getString(R.string.app_name);
 
                 // Define the text of the notification
@@ -523,7 +546,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 // Create the notification
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
-                        .setSmallIcon(iconId)
+                        .setLargeIcon(largeIcon)
                         .setContentTitle(title)
                         .setContentText(contentText);
 

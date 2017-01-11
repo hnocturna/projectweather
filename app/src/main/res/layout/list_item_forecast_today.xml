@@ -15,24 +15,25 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginLeft="60dp"
+        android:layout_marginStart="60dp"
         >
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_date_text"
             style="@style/list_today_date_text"
             />
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_high_text"
             style="@style/list_today_high_text"
             />
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/list_item_low_text"
             style="@style/list_today_low_text"
@@ -51,6 +52,7 @@
         <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:adjustViewBounds="true"
             android:id="@+id/list_item_icon"
             />
 

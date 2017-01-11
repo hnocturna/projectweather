@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
 
 /**
@@ -180,7 +181,14 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         humidityText.setText(humidity);
         windText.setText(wind);
         pressureText.setText(pressure);
-        iconView.setImageResource(weatherArt);
+
+        // If art resource exists in online icon pack, then use it as the image resource, otherwise
+        // fall back to integrated icon pack
+        Glide.with(context)
+                .load(Utility.getArtUrlForWeatherCondition(context, weatherId))
+                .error(Utility.getArtResourceForWeatherCondition(weatherId))
+                .into(iconView);
+
     }
 
     @Override

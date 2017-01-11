@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
 
 /**
@@ -125,6 +126,9 @@ public class ForecastAdapter extends CursorAdapter {
                 Utility.isMetric(context)
         );
 
+        // Get weather description from weather condition ID to be used in content description
+        String weatherDescription = Utility.getStringForWeatherCondition(context, weatherId);
+
         // Retrieve the ViewHolder pattern from the tag passed from newView
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
@@ -134,11 +138,27 @@ public class ForecastAdapter extends CursorAdapter {
         viewHolder.highView.setText(highTemperature);
         viewHolder.lowView.setText(lowTemperature);
 
-        if (viewType == VIEW_TYPE_TODAY) {
-            viewHolder.iconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherId));
-        } else {
-            viewHolder.iconView.setImageResource(Utility.getIconResourceForWeatherCondition(weatherId));
-        }
+        // Set content descriptions. Icon does not require content description because it would be
+        // repetitive and it's not individually selectable anyways
+        viewHolder.descriptionView.setContentDescription(context.getString(R.string.a11y_forecast,
+                weatherDescription));
+        viewHolder.highView.setContentDescription(context.getString(R.string.a11y_high_temp,
+                highTemperature));
+        viewHolder.lowView.setContentDescription(context.getString(R.string.a11y_low_temp,
+                lowTemperature));
+
+//        if (viewType == VIEW_TYPE_TODAY) {
+//            viewHolder.iconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherId));
+//        } else {
+//            viewHolder.iconView.setImageResource(Utility.getIconResourceForWeatherCondition(weatherId));
+//        }
+
+        // Utilize online resource if icon exists, otherwise fall back to integrated icons
+        Glide.with(context)
+                .load(Utility.getArtUrlForWeatherCondition(context, weatherId))
+                .error(Utility.getArtResourceForWeatherCondition(weatherId))
+                .into(viewHolder.iconView);
+
     }
 
     private static class ViewHolder {
