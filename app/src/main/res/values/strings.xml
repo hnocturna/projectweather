@@ -50,10 +50,13 @@
     <string name="format_temperature"><xliff:g id="temperature">%1.0f</xliff:g>\u00B0</string>
 
     <!-- String format for details screen -->
-    <string name="format_humidity">Humidity: <xliff:g id="humidity">%1.0f</xliff:g>%%</string>
-    <string name="format_pressure">Pressure: <xliff:g id="pressure">%1.0f</xliff:g> kPa</string>
-    <string name="format_wind_kmh">Wind: <xliff:g id="wind_speed">%1.0f</xliff:g> km/h <xliff:g id="wind_direction">%s</xliff:g></string>
-    <string name="format_wind_mph">Wind: <xliff:g id="wind_speed">%1.0f</xliff:g> mph <xliff:g id="wind_direction">%s</xliff:g></string>
+    <string name="format_humidity"><xliff:g id="humidity">%1.0f</xliff:g>%%</string>
+    <string name="format_pressure"><xliff:g id="pressure">%1.0f</xliff:g> kPa</string>
+    <string name="format_wind_kmh"><xliff:g id="wind_speed">%1.0f</xliff:g> km/h <xliff:g id="wind_direction">%s</xliff:g></string>
+    <string name="format_wind_mph"><xliff:g id="wind_speed">%1.0f</xliff:g> mph <xliff:g id="wind_direction">%s</xliff:g></string>
+    <string name="humidity">Humidity</string>
+    <string name="pressure">Pressure</string>
+    <string name="wind">Wind</string>
 
     <!-- SyncAdapter related -->
     <string name="sync_account_type">sunshine.example.com</string>
@@ -79,7 +82,7 @@
 
     <!-- Strings used when displaying the state of the Location in settings -->
     <string name="pref_location_error_description">Invalid Location (<xliff:g id="location_setting">%1$s</xliff:g>)"</string>
-    <string name="pref_location_unknown_description">Validating Location... (<xliff:g id="location_setting">%1$s</xliff:g>)"</string>
+    <string name="pref_location_unknown_description">Validating Location&#8230; (<xliff:g id="location_setting">%1$s</xliff:g>)"</string>
 
     <!-- A11y -->
     <string name="a11y_forecast">Forecast: <xliff:g id="condition">%1$s</xliff:g></string>
@@ -150,5 +153,6 @@
     <!-- Format for retrieving art from an external source [CHAR LIMIT=NONE] -->
     <string name="format_art_url" translatable="false">https://raw.githubusercontent.com/udacity/Sunshine-Version-2/sunshine_master/app/src/main/res/drawable-xxhdpi/art_<xliff:g id="description">%s</xliff:g>.png</string>
 
-
+    <!-- String for Google Cloud Messaging Weather Alert -->
+    <string name="gcm_weather_alert">Weather Alert! <xliff:g id="weather">%1$s</xliff:g> at <xliff:g id="location">%2$s</xliff:g></string>
 </resources>

@@ -75,7 +75,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         // Views are set as member variables to prevent waste of resources from constantly
         // traversing the view tree in the onLoadFinished of the Loader
         dayText = (TextView) rootView.findViewById(R.id.detail_day_text);
-        dateText = (TextView) rootView.findViewById(R.id.detail_date_text);
+        // dateText = (TextView) rootView.findViewById(R.id.detail_date_text);
         descriptionText = (TextView) rootView.findViewById(R.id.detail_description_text);
         highText = (TextView) rootView.findViewById(R.id.detail_high_text);
         lowText = (TextView) rootView.findViewById(R.id.detail_low_text);
@@ -173,8 +173,8 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         int weatherArt = Utility.getArtResourceForWeatherCondition(weatherId);
 
         // Set the Views in the DetailsFragment to the Strings extracted from the Cursor
-        dayText.setText(day);
-        dateText.setText(date);
+        dayText.setText(day + ", " + date);
+//        dateText.setText(date);
         descriptionText.setText(description);
         highText.setText(highTemperatures);
         lowText.setText(lowTemperatures);

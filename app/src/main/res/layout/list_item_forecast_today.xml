@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:paddingTop="16dp"
     android:paddingBottom="16dp"
-    android:background="@color/sunshine_blue"
+    android:background="@color/colorPrimary"
     android:gravity="bottom"
     >
 

@@ -55,7 +55,7 @@ import java.util.concurrent.ExecutionException;
  */
 
 public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
-    private final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
+    private static final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
     private Context context;
 
     // Interval at which to sync with weather, in seconds (60 seconds x 180 min = 3 hours)
@@ -81,8 +81,6 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     // Other related constants
     private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
     private static final int WEATHER_NOTIFICATION_ID = 3004;
-
-    private static final String NOTIFICATION = "notified";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({LOCATION_STATUS_OKAY, LOCATION_STATUS_SERVER_DOWN, LOCATION_STATUS_SERVER_INVALID,
@@ -228,6 +226,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
      * @return fake account
      */
     public static Account getSyncAccount(Context context) {
+        Log.v(LOG_TAG, "in getSyncAccount");
         // Retrieve instance of Android AccountManager
         AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 
@@ -266,12 +265,13 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     /**
-     * Helper method for when a new account is created to set up sync settings and being first sync
+     * Helper method for when a new account is created to set up sync settings and do first sync
      * @param newAccount dummy account
      * @param context for accessing string parameters and passing to called methods
      */
     private static void onAccountCreated(Account newAccount, Context context) {
-        // Since an acocunt has been created
+        Log.v(LOG_TAG, "in onAccountCreated");
+        // Since an account has been created
         SunshineSyncAdapter.configurePeriodicSync(context, SYNC_INTERVAL, SYNC_FLEXTIME);
 
         // Enable periodic sync
@@ -281,7 +281,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         syncImmediately(context);
     }
 
-    public static void intitializeSyncAdapter(Context context) {
+    public static void initializeSyncAdapter(Context context) {
         getSyncAccount(context);
     }
 
@@ -492,6 +492,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
         if (currentTime - lastNotify < DAY_IN_MILLIS || !notifications) {
             // Nothing to do if last notification was less then 24hrs ago
+            Log.v(LOG_TAG, "No notification sent. Last notification: " + ((currentTime - lastNotify) / 1000) + " seconds ago");
             return;
         } else {
             // Send notification because more than 24hr since last notification
@@ -514,7 +515,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 double low = cursor.getDouble(COL_MIN_TEMP);
                 String shortDescription = cursor.getString(COL_SHORT_DESC);
 
-//                int iconId = Utility.getIconResourceForWeatherCondition(weatherId);
+                int iconId = Utility.getIconResourceForWeatherCondition(weatherId);
 
                 // Get icon dimensions so that Glide can properly load the image to the correct size
                 int largeIconWidth = Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB
@@ -546,6 +547,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 // Create the notification
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                        .setSmallIcon(iconId)
                         .setLargeIcon(largeIcon)
                         .setContentTitle(title)
                         .setContentText(contentText);
@@ -555,7 +557,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                 // twoPane later on
                 Intent resultIntent = new Intent(context, MainActivity.class);
 
-                // MainActivity is already at the stop so it is just added as the next Intent
+                // MainActivity is already at the top so it is just added as the next Intent
                 TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
                 stackBuilder.addNextIntent(resultIntent);
 
@@ -581,8 +583,8 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             // Store the time of this notification so that it can be checked prior to the next
             // notification
             prefs.edit()
-                    .putLong(NOTIFICATION, System.currentTimeMillis())
-                    .commit();
+                    .putLong(lastNotificationKey, System.currentTimeMillis())
+                    .apply();
         }
         Log.v(LOG_TAG, "Notification sent!");
     }

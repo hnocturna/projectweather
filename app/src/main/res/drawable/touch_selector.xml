@@ -2,7 +2,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- For when an item has been selected -->
     <item android:state_activated="true"
-        android:drawable="@color/sunshine_light_blue" />
+        android:drawable="@color/colorPrimaryLight" />
 
     <!-- For when an item is being pressed. Immediately fades when touch is released -->
     <item android:state_pressed="true"

@@ -498,8 +498,6 @@ public class Utility {
                 ? context.getString(R.string.pref_icon_colored_url)
                 : context.getString(R.string.pref_icon_mono_url);
 
-        Log.v(LOG_TAG, "Selected icon pack URL: " + String.format(iconPackUrl, "storm"));
-
         if (weatherId >= 200 && weatherId <=232) {
             return String.format(iconPackUrl, "storm");
         } else if (weatherId >= 500 && weatherId <= 531) {

@@ -1,23 +1,30 @@
 package com.example.android.sunshine.app;
 
 import android.content.Intent;
-import android.database.Cursor;
-import android.location.Location;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.android.sunshine.app.data.WeatherContract;
+import com.example.android.sunshine.app.gcm.RegistrationIntentService;
 import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 
 public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback{
+    // Constants
     private final String LOG_TAG = MainActivity.class.getSimpleName();
     private final String DETAILFRAGMENT_TAG = "DFTAG";
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    public static final String SENT_TOKEN_TO_SERVER = "sentTokenToServer";
+
+    // Member Variables
     private String location;
     private boolean twoPane;
     private Uri uri;
@@ -26,6 +33,14 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Set the custom Material toolbar as the ActionBar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // Apply styling to Toolbar
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         // Check whether there are two panes in the MainActivity (the layout will be decided based
         // on the smallest width of the device.
         if (findViewById(R.id.weather_detail_container) == null) {
@@ -48,7 +63,23 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         }
         location = Utility.getPreferredLocation(this);
 
-        SunshineSyncAdapter.intitializeSyncAdapter(this);
+        SunshineSyncAdapter.initializeSyncAdapter(this);
+
+        if (checkPlayServices()) {
+            // Check if app is already registered
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+            // Check if token was retrieved
+            boolean sentToken = prefs.getBoolean(SENT_TOKEN_TO_SERVER, false);
+            if (!sentToken) {
+                // If token was not retrieved, attempt to register app
+                Intent intent = new Intent(this, RegistrationIntentService.class);
+                startService(intent);
+            } else {
+                String token = prefs.getString("token", "");
+                Log.i(LOG_TAG, "GCM Registration Token: " + token);
+            }
+        }
     }
 
     @Override
@@ -131,5 +162,25 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
                     .setData(dateUri);
             startActivity(intent);
         }
+    }
+
+    /**
+     * Helper method for checking whether Google Play Services is installed on the users phone so
+     * that Google Cloud Messaging features can be enabled.
+     * @return true if GPS is installed, false if it is not installed
+     */
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.i(LOG_TAG, "Google Play Services not installed. This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 }

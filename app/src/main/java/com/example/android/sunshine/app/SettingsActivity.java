@@ -84,10 +84,6 @@ public class SettingsActivity extends PreferenceActivity
             // For list preferences, look up the correct display value in the entries list
             ListPreference listPreference = (ListPreference) preference;
             int prefIndex = listPreference.findIndexOfValue(stringValue);
-//            if (key.equals(getString(R.string.pref_icons_key))) {
-//                prefIndex = stringValue.contains("Colored") ? 0 : 1;
-//            }
-            Log.v("FUCK THIS SUMMARY", "StringValue: " + stringValue + " | " + "prefIndex: " + prefIndex);
             if (prefIndex >= 0) {
                 preference.setSummary(listPreference.getEntries()[prefIndex]);
             }
