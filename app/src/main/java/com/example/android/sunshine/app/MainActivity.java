@@ -2,8 +2,10 @@ package com.example.android.sunshine.app;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -11,6 +13,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.gcm.RegistrationIntentService;
 import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
 import com.google.android.gms.common.ConnectionResult;
@@ -26,7 +29,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
 
     // Member Variables
     private String location;
-    private boolean twoPane;
+    public static boolean twoPane;
     private Uri uri;
 
     @Override
@@ -53,8 +56,27 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
             twoPane = true;
             // Populate the container with a new DetailsFragment
             if (savedInstanceState == null) {       // If the screen is rotated, the system will automatically restore the DetailsFragment that was there before the rotation
+                // Otherwise, set DetailFragment to today's details
+                DetailsFragment detailsFragment = new DetailsFragment();
+                Cursor cursor = getContentResolver().query(WeatherContract.WeatherEntry.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        WeatherContract.WeatherEntry.COLUMN_DATE + " ASC"
+                );
+                if (cursor.moveToFirst()) {
+                    // If database is populated, then select today, otherwise, open a blank DetailsFragment
+                    long todayDate = cursor.getLong(cursor.getColumnIndex(WeatherContract.WeatherEntry.COLUMN_DATE));
+                    Uri todayUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
+                            Utility.getPreferredLocation(this),
+                            todayDate
+                    );
+                    Bundle args = new Bundle();
+                    args.putParcelable(DetailsFragment.DETAIL_URI, todayUri);
+                    detailsFragment.setArguments(args);
+                }
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.weather_detail_container, new DetailsFragment(), DETAILFRAGMENT_TAG)
+                        .replace(R.id.weather_detail_container, detailsFragment, DETAILFRAGMENT_TAG)
                         .commit();
             }
             ForecastFragment forecastFragment = (ForecastFragment) getSupportFragmentManager()
@@ -146,7 +168,6 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
             // Pass the URI as a Bundle argument. Bundle arguments cannot be changed once they have
             // been passed. This is useful because if the fragment is destroyed on rotation, the
             // bundle will remain the same
-            Log.v(LOG_TAG, "twoPane is true?");
             Bundle args = new Bundle();
             args.putParcelable(DetailsFragment.DETAIL_URI, dateUri);
 

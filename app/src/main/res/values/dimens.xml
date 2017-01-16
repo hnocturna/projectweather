@@ -8,8 +8,33 @@
 
     <!-- Icon Sizes -->
     <dimen name="today_icon">96dp</dimen>
+    <dimen name="list_icon">40dp</dimen>
 
     <!--Extra Padding -->
     <dimen name="default_vertical_margin">16dp</dimen>
     <dimen name="default_horizontal_margin">32dp</dimen>
+
+    <!-- Text Sizes. Fixed in DP as to prevent scaling issues when larger fonts are used -->
+    <dimen name="forecast_text_size">32dp</dimen>
+
+    <!-- Odd width is to match text size -->
+    <dimen name="forecast_text_width">49dp</dimen>
+
+    <!-- Limited spacing on the list item requires a smaller margin than the default setting -->
+    <dimen name="forecast_temperature_space">8dp</dimen>
+
+    <!-- Needed if we aren't including the Material Design Library -->
+    <dimen name="appbar_elevation">4dp</dimen>
+
+    <!-- The amount we want the details view to overlap the app bar -->
+    <dimen name="details_app_bar_overlap">24dp</dimen>
+
+    <!-- Help to make us tablet beautiful -->
+    <dimen name="list_item_extra_padding">0dp</dimen>
+    <dimen name="detail_view_padding">@dimen/abc_list_item_padding_horizontal_material</dimen>
+    <dimen name="forecast_detail_padding_wide">16dp</dimen>
+    <dimen name="detail_container_bottom_margin">@dimen/detail_view_padding</dimen>
+
+    <dimen name="detail_card_elevation">6dp</dimen>
+    <dimen name="landscape_forecast_view_width">360dp</dimen>
 </resources>

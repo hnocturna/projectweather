@@ -1,6 +1,7 @@
 package com.example.android.sunshine.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,12 +10,22 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.ShareActionProvider;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 
 import com.bumptech.glide.Glide;
 import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
@@ -23,10 +34,16 @@ import com.example.android.sunshine.app.data.WeatherContract.WeatherEntry;
  * A placeholder fragment containing a simple view.
  */
 public class DetailsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    // Constants
     private static final String LOG_TAG = DetailsFragment.class.getSimpleName();
+    private static final String FORECAST_SHARE_HASHTAG = "#SunShineApp";
     private static final int DETAILS_LOADER = 0;
     public static String DETAIL_URI = "DETAIL_URI";
+
+    // Member Variables
     private static Uri uri;
+    private static String mForecast;
+    private ShareActionProvider mShareActionProvider;
 
     private static final String[] DETAILS_COLUMNS = new String[]{
             WeatherEntry.TABLE_NAME + "." + WeatherEntry._ID,
@@ -70,7 +87,12 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_detail_start, container, false);
+
+        // Set Toolbar as ActionBar and applying theming
+        Toolbar toolbar = (android.support.v7.widget.Toolbar) rootView.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Views are set as member variables to prevent waste of resources from constantly
         // traversing the view tree in the onLoadFinished of the Loader
@@ -89,6 +111,10 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             uri = getArguments().getParcelable(DETAIL_URI);
         } else {
             Log.v(LOG_TAG, "No Bundle found!");
+        }
+
+        if (container instanceof CardView) {
+            container.setVisibility(View.INVISIBLE);
         }
 
 //            // Deprecated
@@ -136,8 +162,12 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        Log.v(LOG_TAG, "In onLoadFinished");
-        Log.v(LOG_TAG, "Row returned by cursor: " + cursor.moveToFirst());
+        if (cursor != null && cursor.moveToFirst()) {
+            ViewParent parent = getView().getParent();
+            if (parent instanceof CardView) {
+                ((View)parent).setVisibility(View.VISIBLE);
+            }
+        }
         // If cursor doesn't return any data, finish
         if (!cursor.moveToFirst()) {
             return;
@@ -187,8 +217,62 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         Glide.with(context)
                 .load(Utility.getArtUrlForWeatherCondition(context, weatherId))
                 .error(Utility.getArtResourceForWeatherCondition(weatherId))
+                .crossFade()
                 .into(iconView);
 
+        // Set the string for the share intent
+        mForecast = String.format("%s - %s - %s/%s", dayText.getText(), description, highTemperatures, lowTemperatures);
+
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(createShareIntent());
+        }
+
+        AppCompatActivity activity = (AppCompatActivity)getActivity();
+        Toolbar toolbarView = (Toolbar) getView().findViewById(R.id.toolbar);
+
+        // We need to start the enter transition after the data has loaded
+        if (activity instanceof DetailsActivity) {
+            activity.supportStartPostponedEnterTransition();
+
+            if ( null != toolbarView ) {
+                activity.setSupportActionBar(toolbarView);
+
+                activity.getSupportActionBar().setDisplayShowTitleEnabled(false);
+                activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+        } else {
+            if ( null != toolbarView ) {
+                Menu menu = toolbarView.getMenu();
+                if ( null != menu ) menu.clear();
+                toolbarView.inflateMenu(R.menu.detailfragment);
+                finishCreatingMenu(toolbarView.getMenu());
+            }
+        }
+    }
+
+    private void finishCreatingMenu(Menu menu) {
+        // Retrieve the share menu item
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+        menuItem.setIntent(createShareIntent());
+    }
+
+    /*
+     * Helper method for creating the Share Intent
+     */
+    private Intent createShareIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)    // Sets the intent to return to this app one the share action is complete
+                .setType("text/plain")                                      // Tells Android that you are sharing plain text
+                .putExtra(Intent.EXTRA_TEXT, mForecast + " " + FORECAST_SHARE_HASHTAG);
+        return shareIntent;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (getActivity() instanceof DetailsActivity ) {
+            inflater.inflate(R.menu.detailfragment, menu);
+            finishCreatingMenu(menu);
+        }
     }
 
     @Override

@@ -1,70 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.v7.widget.GridLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="16dp"
-    android:paddingBottom="16dp"
-    android:background="@color/colorPrimary"
-    android:gravity="bottom"
-    >
+    android:background="@drawable/touch_selector_white"
+    android:elevation="4dp"
+    app:columnCount="2">
 
-    <LinearLayout
-        android:layout_width="175dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginLeft="60dp"
-        android:layout_marginStart="60dp"
-        >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/list_item_date_text"
-            style="@style/list_today_date_text"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/list_item_high_text"
-            style="@style/list_today_high_text"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/list_item_low_text"
-            style="@style/list_today_low_text"
-            />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
+    <TextView
+        android:id="@id/list_item_date_text"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        android:fontFamily="sans-serif"
+        android:textColor="@color/secondary_text"
         android:gravity="center_horizontal"
-        android:layout_weight="1"
-        >
+        android:layout_marginTop="@dimen/default_vertical_margin"
+        android:layout_marginBottom="@dimen/default_vertical_margin"
+        app:layout_gravity="fill_horizontal"
+        app:layout_columnWeight="1"
+        app:layout_columnSpan="2"
+        tools:text="Today, January 13"/>
 
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:adjustViewBounds="true"
-            android:id="@+id/list_item_icon"
-            />
+    <ImageView
+        android:id="@+id/list_item_icon"
+        android:layout_width="0dp"
+        android:maxHeight="@dimen/today_icon"
+        android:maxWidth="@dimen/today_icon"
+        android:gravity="center_horizontal"
+        android:adjustViewBounds="true"
+        app:layout_gravity="fill_horizontal"
+        app:layout_columnWeight="1"
+        tools:src="@drawable/art_fog"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:id="@+id/list_item_detail_text"
-            style="@style/list_today_description_text"
-            />
+    <TextView
+        android:id="@+id/list_item_high_text"
+        android:layout_width="0dp"
+        android:fontFamily="sans-serif-light"
+        android:textSize="72sp"
+        android:textColor="@color/primary_text"
+        android:gravity="center_horizontal"
+        app:layout_columnWeight="1"
+        app:layout_gravity="fill_horizontal"
+        tools:text="4"/>
 
-    </LinearLayout>
+    <TextView
+        android:id="@+id/list_item_detail_text"
+        android:layout_width="0dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        android:fontFamily="sans-serif"
+        android:textColor="@color/secondary_text"
+        android:gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/default_vertical_margin"
+        app:layout_gravity="fill_horizontal"
+        app:layout_columnWeight="1"
+        tools:text="Pretty chill"/>
 
-
-</LinearLayout>
+    <TextView
+        android:id="@+id/list_item_low_text"
+        android:layout_width="0dp"
+        android:fontFamily="sans-serif-light"
+        android:textSize="36sp"
+        android:textColor="@color/secondary_text"
+        android:gravity="center_horizontal"
+        app:layout_gravity="fill_horizontal"
+        app:layout_columnWeight="1"
+        tools:text="0"
+        />
+</android.support.v7.widget.GridLayout>

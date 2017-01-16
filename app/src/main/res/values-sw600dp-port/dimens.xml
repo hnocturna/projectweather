@@ -1,0 +1,6 @@
+<resources>
+    <!-- Extra List Item Margin (Tablet Only) -->
+    <dimen name="list_item_extra_padding">80dp</dimen>
+    <dimen name="forecast_temperature_space">@dimen/default_horizontal_margin</dimen>
+    <dimen name="detail_view_padding_vertical">@dimen/abc_list_item_padding_horizontal_material</dimen>
+</resources>

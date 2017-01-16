@@ -5,26 +5,23 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class DetailsActivity extends ActionBarActivity {
-    private static String forecastStr;
+public class DetailsActivity extends AppCompatActivity {
+    // Constants
     private static final String LOG_TAG = DetailsActivity.class.getSimpleName();
-    private static final String FORECAST_SHARE_HASHTAG = "#SunShineApp";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        // Set Toolbar as ActionBar and applying theming
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         Intent intent = getIntent();
         Uri dateUri = null;
@@ -45,34 +42,25 @@ public class DetailsActivity extends ActionBarActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.detailfragment, menu);
-        // Get share menu item then attach the ShareActionProvider to set the intent
-        MenuItem menuItem = menu.findItem(R.id.action_share);
-        ShareActionProvider shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.detailfragment, menu);
+//        // Get share menu item then attach the ShareActionProvider to set the intent
+//        MenuItem menuItem = menu.findItem(R.id.action_share);
+//        ShareActionProvider shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+//
+//        // Attach an intent to the ShareActionProvider
+//        if (shareActionProvider != null) {
+//            shareActionProvider.setShareIntent(createShareIntent());
+//        } else {
+//            Log.d(LOG_TAG, "Share Action Provider is null?");
+//        }
+//
+//        return true;
+//    }
 
-        // Attach an intent to the ShareActionProvider
-        if (shareActionProvider != null) {
-            shareActionProvider.setShareIntent(createShareIntent());
-        } else {
-            Log.d(LOG_TAG, "Share Action Provider is null?");
-        }
 
-        return true;
-    }
-
-    /*
-     * Helper method for creating the Share Intent
-     */
-    private Intent createShareIntent() {
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)    // Sets the intent to return to the app one the share action is complete
-                .setType("text/plain")                                      // Tells Android that you are sharing plain text
-                .putExtra(Intent.EXTRA_TEXT, forecastStr + " " + FORECAST_SHARE_HASHTAG);
-        return shareIntent;
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
